@@ -1,106 +1,74 @@
-# Cement Demand Forecasting Across Multiple Sites
-This project applies machine learning to forecast cement demand across multiple distribution sites. By analyzing historical consumption, seasonality and external drivers, it delivers accurate predictions that support inventory planning, reduce stockouts and overstocking, and improve supply chain efficiency.
+# MIG Cement Demand Forecasting & Inventory Optimisation
 
----
+**Multi-site supply chain analytics and predictive decision support**
 
-##  Table of Contents
-#problem-statement
-#objectives
-#dataset
-#methodology
-#technologies-used
-#project-structure
-#installation
-#usage
-#results
-#business-impact
-#future-work
-#contributing
-#license
-#contact
+I developed this case study around the problem of matching cement supply to construction activity across a distributed site network. The original group assignment compared autoregression, SARIMAX and LightGBM; Random Forest was explored in a subsequent drop-in session. This portfolio edition rebuilds that comparison on a common eight-week forecasting protocol and connects the forecasts to a replenishment policy replay.
 
----
+## Business problem
 
-## 📝 Problem Statement
-Construction suppliers often face fluctuating cement demand across different locations. Without accurate forecasts, they risk stockouts or overstocking, leading to increased costs and project delays.  
-This project builds a **data-driven forecasting solution** to predict weekly or monthly cement demand per site.
+Uncertain pour schedules, weather and site-level consumption create a difficult trade-off between having enough cement for scheduled work and holding excessive inventory. The objective is to give planners an evidence-based view of future consumption, storage constraints and potential replenishment needs.
 
----
+| Case-study objective | Target | Evidence |
+| --- | --- | --- |
+| Daily site-level forecast accuracy | MAPE ≤ 15% over 56 days | Nonzero-day MAPE alongside MAE, RMSE, WAPE and bias |
+| Pour readiness | ≥ 98% | Simulated scheduled-day stock availability |
+| Inventory efficiency | ≥ 20% improvement | Capacity utilisation and stock levels under comparable policies; direction and baseline must be agreed |
+| Write-offs | ≥ 30% reduction | Not measurable without expiry, disposal and write-off records |
+| Decision visibility | Plotly Dash | Three local dashboard views |
 
-## 🎯 Objectives
-- Predict cement demand for multiple sites using historical data.
-- Improve inventory planning and supply chain efficiency.
-- Provide actionable insights to reduce costs and waste.
+## Data and privacy
 
----
+The source is a restricted SQLite database with three related tables: `Operations`, `Sites` and `CementTypes`. I checked integrity, foreign keys, completeness, site-date uniqueness, capacity consistency and inventory arithmetic. Historical overcapacity is retained as a data-quality and operational signal, not silently clipped.
 
-## 📊 Dataset
-- **Source:** (Replace with your data source or mark as “Simulated” if proprietary.)
-- **Features:**
-  - Date / Time
-  - Site ID / Location
-  - Cement quantity delivered or consumed
-  - Weather / Seasonality indicators
-  - Additional demand drivers (if any)
-- **Size:** (Add number of records & features.)
+The database, case-study document, site-level forecasts, inventory traces, credentials and trained models are deliberately excluded from this repository. Only network-wide aggregate results are published. The database is required to reproduce the analysis and must be obtained through an authorised source. Do not upload your local outputs or notebook outputs containing individual site records.
 
-**Preprocessing Steps:** Missing values handled, outliers removed, features engineered (lag variables, rolling averages, etc.).
+## Methodology
 
----
+1. Validate daily site records and retain the observed consumption target.
+2. Create strictly historical lags and rolling statistics at each forecast issue date.
+3. Compare seasonal-naive, AR(7), SARIMAX, Random Forest and LightGBM over three disjoint 56-day windows, refitting on preceding observations only. The first two windows support model selection; the last is the final holdout.
+4. Use MAE as the selection criterion; assess WAPE, RMSE, bias and nonzero-day MAPE. Exclude incomplete model coverage from the selection pool. Zero-consumption days remain in MAE, RMSE and WAPE.
+5. Replay inventory with a two-day delivery lead time, capacity-aware orders and explicit outstanding deliveries. Select buffer days on validation, then compare seasonal-naive and selected-model policies on the final window. Excess starting stock is explicitly segregated in a capacity-feasible scenario; it is not assumed to be discarded. The inventory scenario is exploratory because it was revised after inspecting the initial replay.
+6. Present historical replay results in a local Dash application.
 
-## 🔎 Methodology
-1. **Data Collection & Cleaning**
-2. **Exploratory Data Analysis (EDA)**
-   - Demand trends across sites
-   - Seasonality & external factors
-3. **Feature Engineering**
-   - Lag variables, moving averages, site-level encodings
-4. **Modeling**
-   - Baseline models: Moving Average, ARIMA
-   - Advanced models: Random Forest, XGBoost, Prophet, LSTM
-5. **Model Evaluation**
-   - Metrics: RMSE, MAE, MAPE
-6. **Insights & Recommendations**
+Actual future weather, deliveries, closing inventory and realised consumption are never provided to the forecasting models. Planned-pour snapshots as known at each issue date are not available; historical planned pours are used as lagged signals rather than assuming perfect future schedule knowledge. Site capacity and behavioural labels are treated as static metadata known at issue time.
 
----
+## Results
 
-## 🛠️ Technologies Used
+Random Forest narrowly led the validation comparison on MAE. On the final holdout it reduced MAE by 26.8% relative to the seasonal-naive baseline, but LightGBM and AR were practically tied with it. The 15% conditional MAPE and 98% readiness targets were not met. See [model and inventory results](docs/results.md) for the full benchmark, coverage and target assessment.
 
-| Category           | Tools / Libraries                                    |
-|-------------------|------------------------------------------------------|
-| Data Processing    | Python, pandas, numpy                                 |
-| Visualization      | matplotlib, seaborn, plotly                          |
-| Modeling           | scikit-learn, statsmodels, XGBoost, Prophet           |
-| Environment        | Jupyter Notebook                                     |
-| Version Control    | Git & GitHub                                          |
+![Final holdout model comparison (aggregate only)](assets/model_comparison.svg)
 
----
+## Run locally
 
-Results
+Python 3.12 was used for the portfolio benchmark. From the repository root:
 
-Best Model: Random Forest
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python forecast.py /path/to/authorised/MIG_Cement_Records.db
+python inventory.py /path/to/authorised/MIG_Cement_Records.db
+python app.py
+```
 
-RMSE: 15 tons/week per site (vs. baseline 40 tons)
+Open `http://127.0.0.1:8050`. The dashboard is local-only; do not expose it publicly with restricted outputs. The notebook provides an annotated equivalent workflow. For Windows, activate with `.venv\Scripts\activate`.
 
-MAPE: 8%
+## Repository guide
 
-Key insights:
+| File | Purpose |
+| --- | --- |
+| `Cement_demand_forecasting.ipynb` | Explained end-to-end workflow |
+| `forecast.py` | Data checks, feature engineering and fair model competition |
+| `inventory.py` | Replenishment policy simulation and summary |
+| `app.py` | Executive, forecasting and inventory views |
+| `docs/results.md` | Aggregate benchmark and limitations |
+| `requirements.txt` | Python dependencies |
+| `test_workflow.py` | Synthetic leakage, metric and mass-balance tests |
+| `.gitignore` | Local data and generated-output exclusions |
 
-Seasonality significantly affects demand.
+## Limitations
 
-Certain sites show consistent growth trends.
+Observed consumption can be lower than true demand when supplies constrain work. The stock replay therefore uses recorded consumption, not an estimate of unmet demand. Pour readiness compares available stock to scheduled tonnes, rather than claiming an observed cancellation or completion outcome. No savings, write-offs or carbon reductions are inferred without supporting records. Delivery lead time and buffer are scenario assumptions, not measured service commitments. The unusually large historical overcapacity values require source reconciliation; the replay assumes any opening stock above capacity can be held elsewhere, which must be validated operationally. The historical replay is not a live deployment.
 
-💡 Business Impact
-
-Enables proactive inventory management.
-
-Potential to reduce holding costs by up to 20%.
-
-Supports procurement planning and logistics optimization.
-
-🤝 Contributing
-
-Contributions, issues, and feature requests are welcome!
-Feel free to check the issues page
- or submit a pull request.
-
+**Author:** Oluwadamilare Akinwumi Tijani · [GitHub](https://github.com/DareTJ)

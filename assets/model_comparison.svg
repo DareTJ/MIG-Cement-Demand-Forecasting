@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="430" viewBox="0 0 960 430" role="img" aria-label="Final holdout MAE: Random Forest 11.371, LightGBM 11.366, AR 11.373, seasonal naive 15.535 tonnes. SARIMAX excluded for incomplete coverage.">
+  <rect width="960" height="430" rx="16" fill="#f4f7fa"/>
+  <rect x="24" y="22" width="912" height="82" rx="12" fill="#12334b"/>
+  <g font-family="Arial, sans-serif"><text x="48" y="53" fill="#a7e4df" font-size="13" font-weight="bold" letter-spacing="2">MIG  ·  FORECASTING BENCHMARK</text><text x="48" y="84" fill="#ffffff" font-weight="bold" font-size="25">Final holdout | mean absolute error</text>
+  <text x="44" y="137" fill="#43576a" font-size="15">56 days · 30 sites · 1,680 forecasts per complete model · lower is better</text>
+  <g font-size="16" fill="#12334b"><text x="45" y="187">Random Forest</text><text x="45" y="237">LightGBM</text><text x="45" y="287">AR(7)</text><text x="45" y="337">Seasonal naive</text></g>
+  <g><rect x="230" y="163" width="426.4" height="32" rx="5" fill="#087f78"/><rect x="230" y="213" width="426.2" height="32" rx="5" fill="#397eae"/><rect x="230" y="263" width="426.5" height="32" rx="5" fill="#397eae"/><rect x="230" y="313" width="582.6" height="32" rx="5" fill="#a6b6c6"/></g>
+  <g font-size="17" font-weight="bold" fill="#12334b"><text x="670" y="185">11.371 t</text><text x="670" y="235">11.366 t</text><text x="670" y="285">11.373 t</text><text x="826" y="335">15.535 t</text></g>
+  <text x="44" y="381" font-size="15" font-weight="bold" fill="#087f78">26.8% lower MAE versus seasonal naive (validation-selected Random Forest).</text><text x="44" y="405" font-size="13" fill="#43576a">SARIMAX excluded from this chart because final coverage was incomplete. Model differences are small.</text></g>
+</svg>
