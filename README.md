@@ -37,6 +37,8 @@ Actual future weather, deliveries, closing inventory and realised consumption ar
 
 Random Forest narrowly led the validation comparison on MAE. On the final holdout it reduced MAE by 26.8% relative to the seasonal-naive baseline, but LightGBM and AR were practically tied with it. The 15% conditional MAPE and 98% readiness targets were not met. See [model and inventory results](docs/results.md) for the full benchmark, coverage and target assessment.
 
+The [mathematical diagnostic analysis](docs/diagnostic_analysis.md) investigates why the forecast target remains unmet. It separates uncertainty in planned pours, weather and supply availability from legitimate forecast-time inputs. A hindsight result is not counted as prospective forecast performance.
+
 ![Final holdout model comparison (aggregate only)](assets/model_comparison.svg)
 
 ## Run locally
@@ -63,6 +65,8 @@ Open `http://127.0.0.1:8050`. The dashboard is local-only; do not expose it publ
 | `inventory.py` | Replenishment policy simulation and summary |
 | `app.py` | Executive, forecasting and inventory views |
 | `docs/results.md` | Aggregate benchmark and limitations |
+| `diagnose.py` | Aggregate physical constraint and conditional information experiments |
+| `docs/diagnostic_analysis.md` | Mathematical diagnosis and next steps against the original targets |
 | `requirements.txt` | Python dependencies |
 | `test_workflow.py` | Synthetic leakage, metric and mass-balance tests |
 | `.gitignore` | Local data and generated-output exclusions |
