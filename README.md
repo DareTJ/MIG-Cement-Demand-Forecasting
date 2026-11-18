@@ -4,6 +4,14 @@
 
 I developed this case study around the problem of matching cement supply to construction activity across a distributed site network. The original group assignment compared autoregression, SARIMAX and LightGBM; Random Forest was explored in a subsequent drop-in session. This portfolio edition rebuilds that comparison on a common eight-week forecasting protocol and connects the forecasts to a replenishment policy replay.
 
+## Start here: one business-first notebook
+
+The primary walkthrough is **[Cement_demand_forecasting.ipynb](Cement_demand_forecasting.ipynb)**. I consolidated the operational analysis and planned-pour experiments into the existing notebook, preserving that filename and retaining earlier revisions in Git history. This notebook now follows the decision sequence **business problem → source integrity → operational constraints → forecast-time information → conditional model experiments → hypothetical replenishment replay → local dashboard**.
+
+The notebook contains source code and Markdown explanations but deliberately **no executed outputs**. It must be rerun with the authorised local database before its new scenario results can be verified. The published results in [docs/results.md](docs/results.md) are **earlier executed benchmarks**, not evidence that the new notebook has passed a fresh end-to-end run.
+
+For the interpretation of stock availability, planned demand, capacity limits, forecast leakage and remaining evidence requirements, read the [operational decision framework](docs/operational_decision_framework.md). The existing `forecast.py`, `inventory.py`, `diagnose.py`, `app.py` and `test_workflow.py` remain available as previously developed supporting scripts; the notebook does not depend on them to execute its own experiments.
+
 ## Business problem
 
 Uncertain pour schedules, weather and site-level consumption create a difficult trade-off between having enough cement for scheduled work and holding excessive inventory. The objective is to give planners an evidence-based view of future consumption, storage constraints and potential replenishment needs.
@@ -35,11 +43,17 @@ Actual future weather, deliveries, closing inventory and realised consumption ar
 
 ## Results
 
-Random Forest narrowly led the validation comparison on MAE. On the final holdout it reduced MAE by 26.8% relative to the seasonal-naive baseline, but LightGBM and AR were practically tied with it. The 15% conditional MAPE and 98% readiness targets were not met. See [model and inventory results](docs/results.md) for the full benchmark, coverage and target assessment.
+Random Forest narrowly led the validation comparison on MAE. On the final holdout it reduced MAE by 26.8% relative to the seasonal-naive baseline, but LightGBM and AR were practically tied with it. The 15% forecast MAPE and 98% simulated readiness targets were not met. See [model and inventory results](docs/results.md) for the full benchmark, coverage and target assessment.
 
 The [mathematical diagnostic analysis](docs/diagnostic_analysis.md) investigates why the forecast target remains unmet. It separates uncertainty in planned pours, weather and supply availability from legitimate forecast-time inputs. A hindsight result is not counted as prospective forecast performance.
 
 ![Final holdout model comparison (aggregate only)](assets/model_comparison.svg)
+
+### Run the consolidated notebook
+
+Place your **authorised** `MIG_Cement_Records.db` beside `Cement_demand_forecasting.ipynb`, install the dependencies from this repository and open the notebook in your preferred local Jupyter application. Run cells in order, reviewing the operational audit **before** forecasting. The notebook requires additional estimators (XGBoost and CatBoost) for its later exploratory comparisons. The optional Plotly Dash preview is launched manually; it is bound to `127.0.0.1` and must never be exposed publicly with restricted site records.
+
+The 56-day plan-conditional and realised-weather results are **retrospective information scenarios**, not deployable predictions. Do not interpret a provisional replay as achieved savings or procurement instructions. If database units, capacity or plan issue dates remain unresolved, stop at the corresponding decision gate instead of treating the numerical output as validated.
 
 ## Run locally
 
@@ -60,11 +74,12 @@ Open `http://127.0.0.1:8050`. The dashboard is local-only; do not expose it publ
 
 | File | Purpose |
 | --- | --- |
-| `Cement_demand_forecasting.ipynb` | Explained end-to-end workflow |
+| `Cement_demand_forecasting.ipynb` | One business-first, independently explained notebook (unexecuted working revision on this branch) |
 | `forecast.py` | Data checks, feature engineering and fair model competition |
 | `inventory.py` | Replenishment policy simulation and summary |
 | `app.py` | Executive, forecasting and inventory views |
-| `docs/results.md` | Aggregate benchmark and limitations |
+| `docs/results.md` | Prior executed aggregate benchmark and limitations |
+| `docs/operational_decision_framework.md` | Physical constraints, decision timing, policy conditions and evidence gates |
 | `diagnose.py` | Aggregate physical constraint and conditional information experiments |
 | `docs/diagnostic_analysis.md` | Mathematical diagnosis and next steps against the original targets |
 | `requirements.txt` | Python dependencies |
